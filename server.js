@@ -84,3 +84,16 @@ app.post('/api/send', async (req, res) => {
 });
 
 app.listen(3000, () => console.log('App running: http://localhost:3000'));
+
+app.post('/api/send', async (req, res) => {
+  try {
+    if (!oauthTokens.refresh_token) return res.status(401).json({ message: 'Login required' });
+
+    // rest of code...
+
+  } catch (err) {
+    console.error('Send error:', err);
+    res.status(500).json({ message: 'Error sending email', error: err.message });
+  }
+});
+
