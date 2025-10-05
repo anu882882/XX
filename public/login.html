@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login - Gmail OAuth2</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>Enter Gmail Refresh Token</h2>
+      <input id="refresh_token" placeholder="Refresh Token" />
+      <button onclick="login()">Login</button>
+      <div id="result"></div>
+    </div>
+    <a href="launcher.html">Go To Launcher</a>
+    <script>
+      async function login() {
+        const token = document.getElementById('refresh_token').value;
+        let r = await fetch('/api/login', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: token })
+        });
+        let res = await r.json();
+        document.getElementById('result').innerText = res.success ? "Login successful!" : "Login failed!";
+      }
+    </script>
+  </body>
+</html>
