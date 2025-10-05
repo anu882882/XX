@@ -3,25 +3,29 @@
   <head>
     <title>Login - Gmail OAuth2</title>
     <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body>
     <div class="container">
       <h2>Enter Gmail Refresh Token</h2>
       <input id="refresh_token" placeholder="Refresh Token" />
-      <button onclick="login()">Login</button>
+      <button id="btnLogin">Login</button>
       <div id="result"></div>
+      <p style="font-size:12px;color:#666">
+        Tip: Generate via OAuth 2.0 Playground with scope https://mail.google.com/
+      </p>
     </div>
     <a href="launcher.html">Go To Launcher</a>
     <script>
-      async function login() {
-        const token = document.getElementById('refresh_token').value;
-        let r = await fetch('/api/login', {
+      document.getElementById('btnLogin').onclick = async function () {
+        const token = document.getElementById('refresh_token').value.trim();
+        const r = await fetch('/api/login', {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refresh_token: token })
         });
-        let res = await r.json();
-        document.getElementById('result').innerText = res.success ? "Login successful!" : "Login failed!";
+        const res = await r.json();
+        document.getElementById('result').innerText = res.success ? "Login successful!" : ("Login failed: " + (res.message || ''));
       }
     </script>
   </body>
