@@ -12,7 +12,7 @@
       <button id="btnLogin">Login</button>
       <div id="result"></div>
       <p style="font-size:12px;color:#666">
-        Tip: Generate via OAuth 2.0 Playground with scope https://mail.google.com/
+        Generate via OAuth 2.0 Playground with scope https://mail.google.com/
       </p>
     </div>
     <a href="launcher.html">Go To Launcher</a>
@@ -25,7 +25,8 @@
           body: JSON.stringify({ refresh_token: token })
         });
         const res = await r.json();
-        document.getElementById('result').innerText = res.success ? "Login successful!" : ("Login failed: " + (res.message || ''));
+        document.getElementById('result').innerText =
+          res.success ? "Login successful!" : ("Login failed: " + (res.message || ''));
       }
     </script>
   </body>
