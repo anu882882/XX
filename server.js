@@ -7,13 +7,13 @@ require('dotenv').config();
 
 const app = express();
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// In-memory token store (for demo)
+// Simple in-memory token store for demo
 let REFRESH_TOKEN_MEMORY = "";
 
 // Env
@@ -34,9 +34,8 @@ async function verifyRefreshToken(refreshToken) {
     const oAuth2Client = getOAuth2Client(refreshToken);
     const tokenResp = await oAuth2Client.getAccessToken();
     const accessToken = tokenResp?.token || tokenResp;
-    if (!accessToken) throw new Error('No access token received');
-    return true;
-  } catch (e) {
+    return !!accessToken;
+  } catch {
     return false;
   }
 }
@@ -47,46 +46,31 @@ app.get('/', (_req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-  try {
-    const { refresh_token } = req.body || {};
-    if (!refresh_token || typeof refresh_token !== 'string') {
-      return res.status(400).json({ success: false, message: 'Missing refresh_token in body' });
-    }
-    const ok = await verifyRefreshToken(refresh_token);
-    if (!ok) {
-      return res.status(401).json({ success: false, message: 'Invalid or revoked refresh token' });
-    }
-    REFRESH_TOKEN_MEMORY = refresh_token;
-    return res.json({ success: true, message: 'Login successful' });
-  } catch (e) {
-    return res.status(500).json({ success: false, message: e.message });
-  }
+  const { refresh_token } = req.body || {};
+  if (!refresh_token) return res.status(400).json({ success: false, message: 'Missing refresh_token' });
+  const ok = await verifyRefreshToken(refresh_token);
+  if (!ok) return res.status(401).json({ success: false, message: 'Invalid refresh token' });
+  REFRESH_TOKEN_MEMORY = refresh_token;
+  res.json({ success: true, message: 'Login successful' });
 });
 
 app.post('/api/logout', (_req, res) => {
   REFRESH_TOKEN_MEMORY = "";
-  return res.json({ success: true, message: 'Logged out' });
+  res.json({ success: true, message: 'Logged out' });
 });
 
 app.post('/api/send', async (req, res) => {
   try {
-    if (!REFRESH_TOKEN_MEMORY) {
-      return res.status(401).json({ success: false, message: 'Not logged in. Set refresh token first.' });
-    }
-    const { to, subject, text } = req.body || {};
-    if (!to || !subject) {
-      return res.status(400).json({ success: false, message: 'Missing to or subject' });
-    }
+    if (!REFRESH_TOKEN_MEMORY) return res.status(401).json({ success: false, message: 'Not logged in' });
 
-    // Get fresh access token
+    const { to, subject, text } = req.body || {};
+    if (!to || !subject) return res.status(400).json({ success: false, message: 'Missing to or subject' });
+
     const oAuth2Client = getOAuth2Client(REFRESH_TOKEN_MEMORY);
     const at = await oAuth2Client.getAccessToken();
     const accessToken = at?.token || at;
-    if (!accessToken) {
-      return res.status(401).json({ success: false, message: 'Failed to obtain access token. Token may be invalid.' });
-    }
+    if (!accessToken) return res.status(401).json({ success: false, message: 'Access token fetch failed' });
 
-    // Nodemailer transporter
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -99,37 +83,4 @@ app.post('/api/send', async (req, res) => {
       }
     });
 
-    // Cap 30 recipients
-    let recipients = to.split(',').map(s => s.trim()).filter(Boolean);
-    if (recipients.length === 0) {
-      return res.status(400).json({ success: false, message: 'No valid recipients' });
-    }
-    if (recipients.length > 30) {
-      recipients = recipients.slice(0, 30);
-    }
-
-    const info = await transporter.sendMail({
-      from: `Bulk OAuth2 Sender <${EMAIL_ADDRESS}>`,
-      to: recipients,
-      subject,
-      text: text || ''
-    });
-
-    return res.json({ success: true, accepted: info.accepted || [] });
-  } catch (e) {
-    // Provide more detailed error messages for OAuth errors
-    return res.status(500).json({
-      success: false,
-      message: e.message || 'Send failed',
-      code: e.code || undefined,
-      response: e.response || undefined
-    });
-  }
-});
-
-// Healthcheck
-app.get('/healthz', (_req, res) => res.json({ ok: true }));
-
-// Start
-const port = process.env.PORT || 3000;
-app.listen(port, ()
+    let recipients = to.split(',').map(s => s
