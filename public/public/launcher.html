@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bulk Email Launcher</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Bulk Email Sender (OAuth2)</h2>
+      <form id="mailForm">
+        <input id="subject" placeholder="Subject" /><br/>
+        <textarea id="emails" placeholder="Recipient Emails, comma-separated"></textarea><br/>
+        <textarea id="text" placeholder="Message Body"></textarea><br/>
+        <button type="submit">Send Email</button>
+      </form>
+      <button onclick="logout()">Logout / Change Account</button>
+      <div id="output"></div>
+    </div>
+    <a href="login.html">Back to Login</a>
+  </body>
+</html>
