@@ -1,0 +1,7 @@
+body { background: #eef3fd; color: #333; font-family: Arial, sans-serif; }
+.container { background: #fff; max-width: 400px; margin: 50px auto; padding: 30px 30px 24px 30px; border-radius: 12px; box-shadow: 0 2px 8px #b0b8d9; }
+input, textarea { width: 95%; margin: 7px 0; padding: 7px; border-radius: 6px; border: 1px solid #c2c8e2; font-size: 1em;}
+button { padding: 10px 22px; margin: 4px 2px 8px 0; border: none; border-radius: 7px; background: #487aed; color: #fff; font-size: 1em; cursor: pointer; }
+button:hover { background: #2c43ac; }
+#output { margin: 10px 0; font-size: .95em; min-height: 20px; }
+a { display: inline-block; margin: 10px 0 0 0; color: #487aed; text-decoration: underline;}
